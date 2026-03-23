@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,16 +13,30 @@ import {
 } from 'react-native';
 
 import { LogoFiap } from '../components/LogoFiap';
+import { useUser } from '../contexts/UserContext';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [rm, setRm] = useState('');
+  const { setUser } = useUser();
+  const [rm, setRm] = useState('RM');
   const [nome, setNome] = useState('');
   const [erro, setErro] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  function handleRmChange(text) {
+    // Sempre manter o prefixo "RM"
+    if (!text.startsWith('RM')) {
+      text = 'RM';
+    }
+    // Extrair só os dígitos depois do prefixo, limitar a 6
+    const digits = text.slice(2).replace(/[^0-9]/g, '').slice(0, 6);
+    setRm('RM' + digits);
+  }
 
   function handleEntrar() {
-    if (!rm.trim()) {
-      setErro('Informe seu RM para continuar.');
+    const digits = rm.slice(2);
+    if (digits.length !== 6) {
+      setErro('O RM deve conter exatamente 6 dígitos.');
       return;
     }
     if (!nome.trim()) {
@@ -27,55 +44,77 @@ export default function LoginScreen() {
       return;
     }
     setErro('');
-    router.push('/cardapio');
+    setLoading(true);
+
+    setTimeout(() => {
+      setUser({ rm, nome: nome.trim() });
+      router.push('/cardapio');
+      setLoading(false);
+    }, 1000);
   }
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        {/* Logo */}
-        <View style={styles.logoWrap}>
-          <LogoFiap width={130} height={35} />
-        </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Logo */}
+          <View style={styles.logoWrap}>
+            <LogoFiap width={130} height={35} />
+          </View>
 
-        {/* Heading */}
-        <View style={styles.headingWrap}>
-          <Text style={styles.headingAccent}>CANTINA</Text>
-        </View>
+          {/* Heading */}
+          <View style={styles.headingWrap}>
+            <Text style={styles.headingAccent}>CANTINA</Text>
+          </View>
 
-        {/* Card */}
-        <View style={styles.card}>
-          {/* RM */}
-          <Text style={styles.label}>USUÁRIO (RM)*</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: RM12345"
-            placeholderTextColor="#75838B"
-            keyboardType="numeric"
-            value={rm}
-            onChangeText={setRm}
-          />
+          {/* Card */}
+          <View style={styles.card}>
+            {/* RM */}
+            <Text style={styles.label}>USUÁRIO (RM)*</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="RM000000"
+              placeholderTextColor="#75838B"
+              keyboardType="numeric"
+              value={rm}
+              onChangeText={handleRmChange}
+              maxLength={8}
+            />
 
-          {/* Nome */}
-          <Text style={[styles.label, { marginTop: 20 }]}>NOME COMPLETO*</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Seu nome completo"
-            placeholderTextColor="#75838B"
-            autoCapitalize="words"
-            value={nome}
-            onChangeText={setNome}
-          />
+            {/* Nome */}
+            <Text style={[styles.label, { marginTop: 20 }]}>NOME COMPLETO*</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Seu nome completo"
+              placeholderTextColor="#75838B"
+              autoCapitalize="words"
+              value={nome}
+              onChangeText={setNome}
+            />
 
-          {/* Erro */}
-          {erro !== '' && <Text style={styles.erro}>{erro}</Text>}
+            {/* Erro */}
+            {erro !== '' && <Text style={styles.erro}>{erro}</Text>}
 
-          {/* Botão */}
-          <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={handleEntrar}>
-            <Text style={styles.buttonText}>ENTRAR</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            {/* Botão */}
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              activeOpacity={0.8}
+              onPress={handleEntrar}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'ENTRANDO...' : 'ENTRAR'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Rodapé */}
       <Text style={styles.footer}>PEÇA SEM FILA</Text>
@@ -88,10 +127,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  container: {
+  flex: {
     flex: 1,
-    paddingHorizontal: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 60,
   },
   logoWrap: {
     alignItems: 'center',
@@ -100,13 +143,6 @@ const styles = StyleSheet.create({
   headingWrap: {
     alignItems: 'center',
     marginBottom: 36,
-  },
-  headingLight: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: '300',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
   },
   headingAccent: {
     color: '#ED145B',
@@ -150,6 +186,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 28,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: '#FFFFFF',
