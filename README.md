@@ -13,6 +13,5 @@ npx expo start
 
 - `app/`: rotas com Expo Router
 - `components/`: componentes base reutilizaveis
-- `data/`: definicoes do fluxo do app
 - `assets/`: imagens e icones
 - `styles/`: tema visual compartilhado

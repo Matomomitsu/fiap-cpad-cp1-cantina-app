@@ -26,7 +26,6 @@ export default function CardapioScreen() {
       </View>
 
       <View style={styles.actions}>
-        <PrimaryButton title="Voltar para login" variant="secondary" onPress={() => router.push('/login')} />
         <PrimaryButton title="Finalizar pedido" onPress={() => router.push('/pagamento')} />
       </View>
     </ScreenContainer>

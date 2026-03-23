@@ -21,7 +21,6 @@ export default function PagamentoScreen() {
       </View>
 
       <View style={styles.actions}>
-        <PrimaryButton title="Voltar para cardapio" variant="secondary" onPress={() => router.push('/cardapio')} />
         <PrimaryButton title="Confirmar pagamento" onPress={() => router.push('/pedido-final')} />
       </View>
     </ScreenContainer>
