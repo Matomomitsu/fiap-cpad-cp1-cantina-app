@@ -11,10 +11,12 @@ export default function ContaScreen() {
   const router = useRouter();
   const { user, setUser } = useUser();
   const {cart, setCart} = useCart();
+  const {order, setOrder} = useOrder();
 
   function handleSair() {
     setUser(null);
     setCart({});
+    setOrder(null);
     router.replace('/login');
   }
 

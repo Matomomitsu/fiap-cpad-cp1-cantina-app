@@ -1,16 +1,19 @@
 import { useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ScreenContainer } from '../components/ScreenContainer';
+import { formatPrice } from '../utils/formatPrice';
+import { useOrder } from '../contexts/OrderContext';
 import { theme } from '../styles/theme';
 
 export default function PedidoFinalScreen() {
   const params = useLocalSearchParams();
+  const {order} = useOrder();
 
-  const itens = params.itens ? JSON.parse(params.itens) : [];
-  const total = params.total || '0.00';
-  const formaPagamento = params.formaPagamento || '';
-  const numeroPedido = params.numeroPedido || '---';
+  const itens = order?.itens || [];
+  const total = order?.total || '0.00';
+  const formaPagamento = order?.formaPagamento || '';
+  const numeroPedido = order?.senha || '---';
 
   const formas = {
     pix: 'PIX',
@@ -33,37 +36,36 @@ export default function PedidoFinalScreen() {
       </Text>
 
       {/* Resumo do pedido */}
-      <View style={styles.card}>
-        {itens.map((item, index) => (
-          <View key={item.id}>
-            <View style={styles.itemRow}>
-              <Text style={styles.itemNome}>
-                {item.quantidade}x {item.nome}
-              </Text>
-              <Text style={styles.itemPreco}>
-                R$ {(item.preco * item.quantidade).toFixed(2).replace('.', ',')}
+      <ScrollView style={styles.card} showsVerticalScrollIndicator={false}>
+          {itens.map(({ item, quantity }, index) => (
+              <View key={item.title}>
+                <View style={styles.itemRow}>
+                  <Text style={styles.itemNome}>
+                    {quantity}x {item.title}
+                  </Text>
+                  <Text style={styles.itemPreco}>
+                    {formatPrice(item.price * quantity)}
+                  </Text>
+                </View>
+                {index < itens.length - 1 && (
+                  <View style={styles.divider} />
+                )}
+              </View>
+            ))}
+
+            <View style={styles.dividerStrong} />
+
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Total a pagar</Text>
+              <Text style={styles.totalValor}>
+                {formatPrice(total)}
               </Text>
             </View>
-
-            {index < itens.length - 1 && (
-              <View style={styles.divider} />
-            )}
-          </View>
-        ))}
-
-        <View style={styles.dividerStrong} />
-
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total pago</Text>
-          <Text style={styles.totalValor}>
-            R$ {Number(total).toFixed(2).replace('.', ',')}
-          </Text>
-        </View>
 
         <Text style={styles.pagamento}>
           Forma de pagamento: {formas[formaPagamento] || formaPagamento}
         </Text>
-      </View>
+      </ScrollView>
 
     </ScreenContainer>
   );

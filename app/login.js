@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -51,7 +52,10 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.safe}>
-      <View style={styles.content}>
+      <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+      >
         {/* Logo */}
         <View style={styles.logoWrap}>
           <LogoFiap width={130} height={35} />
@@ -102,7 +106,7 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Rodapé */}
       <Text style={styles.footer}>PEÇA SEM FILA</Text>
@@ -115,7 +119,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  content: {
+  scrollContent: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
